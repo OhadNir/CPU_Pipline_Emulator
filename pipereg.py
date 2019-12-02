@@ -1,7 +1,5 @@
 class PipeReg:
-    input_open = False
-    output_open = False
-    rs = 0
-    rt = 0
-    rd = 0
     
+    def __init__(self, state1, state2):
+        self.input = state1
+        self.output = state2
