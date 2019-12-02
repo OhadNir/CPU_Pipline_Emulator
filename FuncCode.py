@@ -1,13 +1,3 @@
-global RegData
-RegData={"$s0":10, "$s1":15, "$s2":20}
-
-class Instruction:
-    def __init__(self, opin, r1,r2,r3):
-        self.operation=opin
-        self.RD=r1
-        self.RS=r2
-        self.RT=r3
-
 def ALU(instr):
     if type(instr) is not Instruction:
         raise Exception ("The variable being passed into the ALU is not an instruction!")
@@ -42,6 +32,17 @@ def ALU(instr):
     else:
         raise Exception ("The operation is not supported by the ALU")
 
+if __name__=="__main__":
+    global RegData
+    RegData={"$s0":10, "$s1":15, "$s2":20}
 
-ALU(Instruction("addi", "$s0", "$s1", "$s2"))
-print(RegData["$s0"])
+    class Instruction:
+        def __init__(self, opin, r1,r2,r3):
+            self.operation=opin
+            self.RD=r1
+            self.RS=r2
+            self.RT=r3
+
+
+    ALU(Instruction("addi", "$s0", "$s1", "$s2"))
+    print(RegData["$s0"])
