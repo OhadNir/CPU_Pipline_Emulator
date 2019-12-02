@@ -53,37 +53,71 @@ Ayannah - Learning Python and implement PipeReg
 Ohad - Set up globals and skeleton/pseudocode main
 
 
+
 Forwarding Conditions
+
 ◼ EX hazard
+
 ◼ if (EX/MEM.RegWrite and (EX/MEM.RegisterRd ≠ 0)
+
 and (EX/MEM.RegisterRd = ID/EX.RegisterRs))
+
 ForwardA = 10
+
 ◼ if (EX/MEM.RegWrite and (EX/MEM.RegisterRd ≠ 0)
+
 and (EX/MEM.RegisterRd = ID/EX.RegisterRt))
+
 ForwardB = 10
+
 ◼ MEM hazard
+
 ◼ if (MEM/WB.RegWrite and (MEM/WB.RegisterRd ≠ 0)
+
 and (MEM/WB.RegisterRd = ID/EX.RegisterRs))
+
 ForwardA = 01
+
 ◼ if (MEM/WB.RegWrite and (MEM/WB.RegisterRd ≠ 0)
+
 and (MEM/WB.RegisterRd = ID/EX.RegisterRt))
+
 ForwardB = 01
 
+
+
 Data hazards when
+
 1a. EX/MEM.RegisterRd = ID/EX.RegisterRs
+
 1b. EX/MEM.RegisterRd = ID/EX.RegisterRt
+
 2a. MEM/WB.RegisterRd = ID/EX.RegisterRs
+
 2b. MEM/WB.RegisterRd = ID/EX.RegisterRt
 
+
+
 Revised Forwarding Condition
+
 ◼ MEM hazard
+
 ◼ if (MEM/WB.RegWrite and (MEM/WB.RegisterRd ≠ 0)
+
 and not (EX/MEM.RegWrite and (EX/MEM.RegisterRd ≠ 0)
+
 and (EX/MEM.RegisterRd = ID/EX.RegisterRs))
+
 and (MEM/WB.RegisterRd = ID/EX.RegisterRs))
+
 ForwardA = 01
+
 ◼ if (MEM/WB.RegWrite and (MEM/WB.RegisterRd ≠ 0)
+
 and not (EX/MEM.RegWrite and (EX/MEM.RegisterRd ≠ 0)
+
 and (EX/MEM.RegisterRd = ID/EX.RegisterRt))
+
 and (MEM/WB.RegisterRd = ID/EX.RegisterRt))
+
 ForwardB = 01
