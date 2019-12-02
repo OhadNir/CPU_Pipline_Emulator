@@ -16,7 +16,7 @@ List for instructions in I-Type ?
 
 Control - Track forwarding, 
 
-PipeReg - IF/ID, ID/EX, EX/MEM, MEM/WB. Booleans for input and output being open, list for regs.
+PipeReg - IF/ID, ID/EX, EX/MEM, MEM/WB. Booleans for input and output being open, variables for RD, RS, RT.
 
 Global dictionary for register data. All registers are available
 
