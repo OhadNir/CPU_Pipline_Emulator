@@ -7,7 +7,7 @@ Build non-forwarding first!
 
 Classes:
 
-Instruction - R type, I type. With appropriate fields ?. List of 16 strings initalized to ".". Update each cycle index when updating pipeline
+Instruction - R type, I type. With appropriate fields ?. List of 16 strings initalized to ".". Update each cycle index when updating pipeline. Update function that takes string of current stage.
 
 Members: Op, Rd, Rs, Rt
 
@@ -16,7 +16,9 @@ List for instructions in I-Type ?
 
 Control - Track forwarding, 
 
-PipeReg - IF/ID, ID/EX, EX/MEM, MEM/WB. Booleans for input and output being open, variables for RD, RS, RT.
+PipeReg - IF/ID, ID/EX, EX/MEM, MEM/WB. Instruction objects for input and output; NULL if open. String variables for input and output (e.g. "IF", "ID", "EX", etc.)
+
+For update: Make sure output matches input for next is NULL. Look at the instruction you're trying to move and check if its next stage is open. If we're at the last instruction, we don't need to worry about IF/ID input being NULL. Once moved, set previous spots to NULL
 
 Global dictionary for register data. All registers are available
 
@@ -48,9 +50,21 @@ Jesse - ALU
 
 Xavier - Instruction class and file parsing
 
-Ayannah - Learning Python and implement PipeReg
+Ayanna - Learning Python and implement PipeReg
 
 Ohad - Set up globals and skeleton/pseudocode main
+
+
+
+Phase 2 Workload (by Wednesday):
+
+Xavier - File parsing and output printing
+
+Ohad - Fill main (update pipeline - Including Control operations pseudocode; update registers)
+
+Ayanna - NOP push (look at instruction that needs to delay, call insert. Instruction update function, PipeReg name variables
+
+Jesse - Control class (hazard checks and handling, Forwarding, function to execute operation in EX, Branch handling)
 
 
 
