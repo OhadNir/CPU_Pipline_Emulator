@@ -16,14 +16,14 @@ R_Types = ["add, and, or, slt"]
 
 #Convert $zero to '0' when found
 class Instruction(object):
-    
+
     def __init__(self, instr_string):
         self.cycle_states = ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'] #Size of max cycles
         self.full_instr = instr_string
-        
+
         split_instr = instr_string.split(" ")
         self.operation = split_instr[0]
-        
+
         split_regs = split_instr[1].split(",")
         
         #DEFAULT NOTATION
@@ -31,26 +31,27 @@ class Instruction(object):
             self.isBranch = False
             self.RD = split_regs[0]
             self.RS = split_regs[1]
-            
+
             if(len(split_regs) == 3):
                 self.RT = split_regs[2]
             else:
                 self.RT = ""
-        
+
         #BRANCH NOTATION
         else:
             self.isBranch = True
             self.RD = split_regs[2]
             self.RS = split_regs[0]
             self.RT = split_regs[1]
-        
+
         self.type = None
-        
+
         if self.RS == "$zero":
             self.RS = "0"
         if self.RT == "zero":
             self.RS = "0"
-            
+
+
     def __str__(self):
         instr_string = self.full_instr + '\t'
         for state in range(len(self.cycle_states)):
@@ -58,3 +59,31 @@ class Instruction(object):
             if state < len(self.cycle_states) - 1:
                 instr_string += '\t'
         return instr_string
+
+        self.type = None
+
+
+    def update(self, cycle):  # cycle is an int
+        to_add = ""
+        cycle_1 = 0 #SO THE CODE COMPILES
+        if self.full_instr == "nop":  # very rudimentary, will fix later. maybe we should implement a counter?
+            temp = self.cycle_state[cycle_1]
+            if temp == "ID" or temp == "EX" or temp == "MEM":
+                to_add = "*"
+        else:
+            if cycle == 0 or self.cycle_state[cycle - 1] == ".":  # will cycles be passed in starting from 0 or 1?
+                to_add = "IF"
+            elif self.cycle_state[cycle - 1] == "IF":
+                to_add = "ID"
+            elif self.cycle_state[cycle - 1] == "ID":
+                to_add = "EX"
+            elif self.cycle_state[cycle - 1] == "EX":
+                to_add = "MEM"
+            elif self.cycle_state[cycle - 1] == "MEM":
+                to_add = "WB"
+
+        self.cycle_state[cycle] = to_add
+
+    def make_nop(self):  # for when we push nops, the plan is to copy the instruction its based on and then nop it
+        self.full_instr = "nop"
+
