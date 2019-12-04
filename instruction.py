@@ -17,7 +17,7 @@ class Instruction(object):
     def __init__(self, instr_string):
         self.cycle_state = [] #Size of max cycles
         
-        #Populated Member vaiables
+        #Populated Member variables
         self.full_instr = instr_string
         
         split_instr = instr_string.split(" ")
@@ -34,26 +34,26 @@ class Instruction(object):
         
         self.type = None
 
-    def update(self, cycle):
-        str = ""
+    def update(self, cycle):  # cycle is an int
+        to_add = ""
 
         if self.full_instr == "nop":  # very rudimentary, will fix later. maybe we should implement a counter?
-            temp = cycle_state[cycle_1]
-            if temp == "ID" or temp == "EX" or temp == "EX":
-                str = "*"
+            temp = self.cycle_state[cycle_1]
+            if temp == "ID" or temp == "EX" or temp == "MEM":
+                to_add = "*"
         else:
-            if cycle == 0 or cycle_state[cycle - 1] == ".":  # will cycles be passed in starting from 0 or 1?
-                str = "IF"
-            elif cycle_state[cycle - 1] == "IF":
-                str = "ID"
-            elif cycle_state[cycle - 1] == "ID":
-                str = "EX"
-            elif cycle_state[cycle - 1] == "EX":
-                str = "MEM"
-            elif cycle_state[cycle - 1] == "MEM":
-                str = "WB"
+            if cycle == 0 or self.cycle_state[cycle - 1] == ".":  # will cycles be passed in starting from 0 or 1?
+                to_add = "IF"
+            elif self.cycle_state[cycle - 1] == "IF":
+                to_add = "ID"
+            elif self.cycle_state[cycle - 1] == "ID":
+                to_add = "EX"
+            elif self.cycle_state[cycle - 1] == "EX":
+                to_add = "MEM"
+            elif self.cycle_state[cycle - 1] == "MEM":
+                to_add = "WB"
 
-        cycle_state[cycle] = str
+        self.cycle_state[cycle] = to_add
 
     def make_nop(self):  # for when we push nops, the plan is to copy the instruction its based on and then nop it
         self.full_instr = "nop"
