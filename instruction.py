@@ -10,26 +10,51 @@ Basic class for storing standardized instruction data
 R_Types = ["add, and, or, slt"]
 
 #"add $t0,$s2,$s3"
+#loop:
+#sub $s1,$t0,5899898798
+#bne $t8,$zero,loop
 
 #Convert $zero to '0' when found
 class Instruction(object):
     
     def __init__(self, instr_string):
-        self.cycle_state = [] #Size of max cycles
-        
-        #Populated Member vaiables
+        self.cycle_states = ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'] #Size of max cycles
         self.full_instr = instr_string
         
         split_instr = instr_string.split(" ")
         self.operation = split_instr[0]
         
         split_regs = split_instr[1].split(",")
-        self.RD = split_regs[0]
-        self.RS = split_regs[1]
         
-        if(len(split_regs == 3)):
-            self.RT = split_regs[2]
+        #DEFAULT NOTATION
+        if self.operation not in ("beq", "bne"):
+            self.isBranch = False
+            self.RD = split_regs[0]
+            self.RS = split_regs[1]
+            
+            if(len(split_regs) == 3):
+                self.RT = split_regs[2]
+            else:
+                self.RT = ""
+        
+        #BRANCH NOTATION
         else:
-            self.RT = ""
+            self.isBranch = True
+            self.RD = split_regs[2]
+            self.RS = split_regs[0]
+            self.RT = split_regs[1]
         
         self.type = None
+        
+        if self.RS == "$zero":
+            self.RS = "0"
+        if self.RT == "zero":
+            self.RS = "0"
+            
+    def __str__(self):
+        instr_string = self.full_instr + '\t'
+        for state in range(len(self.cycle_states)):
+            instr_string += self.cycle_states[state]
+            if state < len(self.cycle_states) - 1:
+                instr_string += '\t'
+        return instr_string
