@@ -30,16 +30,16 @@ class Control(object):
             EXHazard=True
         if (not EXHazard) and (pipeline_registers[MEMWB].input.RD==pipeline_registers[IDEX].input.RS):
             self.DataHazardFlag=True
-            self.ForwardA=01
+            self.ForwardA=1
         if (not EXHazard) and (pipeline_registers[MEMWB].input.RD==pipeline_registers[IDEX].input.RT):
             self.DataHazrdFlag=True
-            self.ForwardB=01
+            self.ForwardB=1
 
     def BranchValue():
         instr=pipeline_registers[MEMWB].ouput
-        if instr.operation=="beq" && instr.RS==instr.RT:
+        if instr.operation=="beq" and instr.RS==instr.RT:
             return labelDictionary[isntr.RD]
-        if instr.operation=="bne" && instr.RS!=instr.RT:
+        if instr.operation=="bne" and instr.RS!=instr.RT:
             return labelDictionary[instr.RD]
         return -1
 
