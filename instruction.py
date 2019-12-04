@@ -33,3 +33,27 @@ class Instruction(object):
             self.RT = ""
         
         self.type = None
+
+    def update(self, cycle):
+        str = ""
+
+        if self.full_instr == "nop":  # very rudimentary, will fix later. maybe we should implement a counter?
+            temp = cycle_state[cycle_1]
+            if temp == "ID" or temp == "EX" or temp == "EX":
+                str = "*"
+        else:
+            if cycle == 0 or cycle_state[cycle - 1] == ".":  # will cycles be passed in starting from 0 or 1?
+                str = "IF"
+            elif cycle_state[cycle - 1] == "IF":
+                str = "ID"
+            elif cycle_state[cycle - 1] == "ID":
+                str = "EX"
+            elif cycle_state[cycle - 1] == "EX":
+                str = "MEM"
+            elif cycle_state[cycle - 1] == "MEM":
+                str = "WB"
+
+        cycle_state[cycle] = str
+
+    def make_nop(self):  # for when we push nops, the plan is to copy the instruction its based on and then nop it
+        self.full_instr = "nop"
