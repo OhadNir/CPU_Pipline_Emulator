@@ -47,9 +47,9 @@ class Control(object):
     def BranchValue():
         instr=pipeline_registers[MEMWB].ouput
         if instr.operation=="beq" and instr.RS==instr.RT:
-            return labelDictionary[isntr.RD]
+            return branch_labels[isntr.RD]
         if instr.operation=="bne" and instr.RS!=instr.RT:
-            return labelDictionary[instr.RD]
+            return branch_labels[instr.RD]
         return -1
 
     def CheckBranch():
