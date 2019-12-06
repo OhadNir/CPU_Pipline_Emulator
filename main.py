@@ -1,6 +1,7 @@
 from FuncCode import ALU
 from instruction import Instruction
-global register_data, pipeline_registers, pipeline_history, all_instructions, cycle_count, max_cycle_count, next_instruction_index
+from Control import Control
+global register_data, pipeline_registers, pipeline_history, all_instructions, cycle_count, max_cycle_count, next_instruction_index, control
 register_data = {
         "$s0": 0,
         "$s1": 0,
@@ -29,6 +30,8 @@ all_instructions = list()
 cycle_count = 0
 max_cycle_count = 16
 next_instruction_index = -1
+
+control=Control()
 
 def read_file():
     #reads input file
