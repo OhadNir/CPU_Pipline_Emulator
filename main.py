@@ -1,6 +1,9 @@
+global register_data, pipeline_registers, pipeline_history, all_instructions, cycle_count, max_cycle_count, next_instruction_index
 from FuncCode import ALU
 from instruction import Instruction
-global register_data, pipeline_registers, pipeline_history, all_instructions, cycle_count, max_cycle_count, next_instruction_index
+import sys
+import CLA
+
 register_data = {
         "$s0": 0,
         "$s1": 0,
@@ -60,22 +63,25 @@ def print_register():
         print(instr)
     
     print("")
-    i = 0
+    i = 1
     for reg in register_data.keys():
-        if i == len(register_data.keys()) - 1:
+        if i == len(register_data.keys()): #Last val
             print(reg + " = " + str(register_data[reg]))
-        elif i < 3:
-            print(reg + " = " + str(register_data[reg]) + "\t", sep = "", end = "")
-        else:
-            print(reg + " = " + str(register_data[reg]), sep = "")
+        elif i % 4 != 0: #Common case
+            print(reg + " = " + str(register_data[reg]) + " \t", sep = "", end = "")
+        else: #Last on line
+            print(reg + " = " + str(register_data[reg]), sep = "", end = "\n")
+        i += 1
 
     print("-" * 82)
     return
     
 if __name__ == '__main__':
 
-    isForwarding = False
-    print("START OF SIMULATION (" + "no" if isForwarding else "" + "forwarding)" )
+    CLA.run_error_check() #DEBUG
+    isForwarding = (sys.argv[1] == "N")
+    make_pipeline(sys.argv[2])
+    print("START OF SIMULATION (" + ("no " if isForwarding else "") + "forwarding)" )
     print("-" * 82)
     
     for cycle_count in range(len(max_cycle_count)):
@@ -84,7 +90,7 @@ if __name__ == '__main__':
             next_instruction_index = temp
         else:
             ALU(pipeline_registers[-1].output_instruction) #output_instruction is the current instruction in the wb pipreg object. Varable can chance based on chosen object varable.
-            next_instruction_index+=1
+            next_instruction_index += 1
             
         control.checkDataHazards()
 
@@ -125,3 +131,4 @@ if __name__ == '__main__':
     
 
     '''
+    print("END OF SIMULATION")
