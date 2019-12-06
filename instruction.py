@@ -59,9 +59,7 @@ class Instruction(object):
             if state < len(self.cycle_states) - 1:
                 instr_string += '\t'
         return instr_string
-
-        self.type = None
-
+    
 
     def update(self, cycle, stage):  # cycle is an int, stage is a string
         if self.full_instr == "nop":  # very rudimentary, will fix later. maybe we should implement a counter?
