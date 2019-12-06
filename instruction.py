@@ -63,24 +63,11 @@ class Instruction(object):
         self.type = None
 
 
-    def update(self, cycle):  # cycle is an int
-        to_add = ""
-        cycle_1 = 0 #SO THE CODE COMPILES
+    def update(self, cycle, stage):  # cycle is an int, stage is a string
         if self.full_instr == "nop":  # very rudimentary, will fix later. maybe we should implement a counter?
-            temp = self.cycle_state[cycle_1]
-            if temp == "ID" or temp == "EX" or temp == "MEM":
-                to_add = "*"
+            to_add = "*"
         else:
-            if cycle == 0 or self.cycle_state[cycle - 1] == ".":  # will cycles be passed in starting from 0 or 1?
-                to_add = "IF"
-            elif self.cycle_state[cycle - 1] == "IF":
-                to_add = "ID"
-            elif self.cycle_state[cycle - 1] == "ID":
-                to_add = "EX"
-            elif self.cycle_state[cycle - 1] == "EX":
-                to_add = "MEM"
-            elif self.cycle_state[cycle - 1] == "MEM":
-                to_add = "WB"
+            to_add = stage
 
         self.cycle_state[cycle] = to_add
 
