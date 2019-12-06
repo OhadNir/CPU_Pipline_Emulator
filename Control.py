@@ -54,7 +54,6 @@ class Control(object):
 
     def CheckBranch():
         instr=pipeline_registers[MEMWB].output
-        cases=["beq", "bne"]
-        if instr.operation in cases:
+        if instr.isBranch:
             return self.BranchValue():
         return -1
