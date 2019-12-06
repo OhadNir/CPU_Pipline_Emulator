@@ -70,10 +70,10 @@ Jesse - Control class (hazard checks and handling, Forwarding, function to execu
 
 Phase 3 Workload (by ): FIX UPDATE TO ACCOUNT FOR PIPELINE POSITION
 
-Xavier - 
+Xavier - First round of debugging. Add functions to main.
 
-Ohad - 
+Ohad - Finish main forwarding logic.
 
-Ayanna - 
+Ayanna - TBD.
 
-Jesse - 
+Jesse - First round of debugging. 
