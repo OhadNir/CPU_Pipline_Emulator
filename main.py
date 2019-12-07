@@ -1,9 +1,9 @@
-from FuncCode import ALU
-from instruction import Instruction
-from Control import Control
 global register_data, pipeline_registers, pipeline_history, all_instructions, cycle_count, max_cycle_count, next_instruction_index, control
 import sys
 import CLA
+from instruction import Instruction
+from Control import Control
+from pipereg import PipeReg
 
 register_data = {
         "$s0": 0,
@@ -30,11 +30,47 @@ pipeline_registers = list()
 pipeline_history = list()
 all_instructions = list()
 
-cycle_count = 0
+cycle_count = -1
 max_cycle_count = 16
 next_instruction_index = -1
 
-control=Control()
+
+def ALU(instr):
+    if instr is None:
+        return
+    if type(instr) is not Instruction:
+        raise Exception ("The variable being passed into the ALU is not an instruction!")
+
+    first=0
+    second=0
+    if instr.RS=="$zero":
+        first=0
+    elif instr.RS not in register_data:
+        first=int(instr.RS)
+    else:
+        first=int(register_data[instr.RS])
+    if instr.RT=="$zero":
+        second=0
+    elif instr.RT not in register_data:
+        second=int(instr.RT)
+    else:
+        second=int(register_data[instr.RT])
+    if instr.operation=="add" or instr.operation=="addi":
+        register_data[instr.RD]=first+second
+    elif instr.operation=="and" or instr.operation=="andi":
+        register_data[instr.RD]=first&second
+    elif instr.operation=="or" or instr.operation=="ori":
+        register_data[instr.RD]=first|second
+    elif instr.operation=="slt" or instr.operation=="slti":
+        register_data[instr.RD]=int(first<second)
+    elif instr.operation=="beq":
+        register_data[instr.RD]=int(first==second)
+    elif instr.operation=="bne":
+        register_data[instr.RD]=int(first!=second)
+
+    else:
+        raise Exception ("The operation is not supported by the ALU")
+
 
 def read_file():
     #reads input file
@@ -57,7 +93,11 @@ def make_pipeline(filename):
     return
 
 def make_pipereg():
-    return
+    IFID=PipeReg(None, None, "IF", "ID")
+    IDEX=PipeReg(None, None, "ID", "EX")
+    EXMEM=PipeReg(None, None, "EX", "MEM")
+    MEMWB=PipeReg(None, None, "MEM", "WB")
+    return [IFID, IDEX, EXMEM, MEMWB]
 
 #I'm assuming this is the function to print the entire pipeline
 def print_register():
@@ -84,33 +124,42 @@ if __name__ == '__main__':
     CLA.run_error_check() #DEBUG
     isForwarding = (sys.argv[1] == "N")
     make_pipeline(sys.argv[2])
+    control=Control(isForwarding)
     print("START OF SIMULATION (" + ("no " if isForwarding else "") + "forwarding)" )
     print("-" * 82)
+
+    pipeline_registers=make_pipereg()
     
-    for cycle_count in range(len(max_cycle_count)):
-        temp = control.CheckBranch()
+    while cycle_count < max_cycle_count:
+        temp = control.CheckBranch(pipeline_registers)
         if temp != -1: 
             next_instruction_index = temp
         else:
-            ALU(pipeline_registers[-1].output_instruction) #output_instruction is the current instruction in the wb pipreg object. Varable can chance based on chosen object varable.
+            if pipeline_registers[-1].output is not None:
+                ALU(pipeline_registers[-1].output) #output is the current instruction in the wb pipreg object. Varable can chance based on chosen object varable.
+                pipeline_registers[-1].output.update(cycle_count, "WB")
+            pipeline_registers[-1].output=None
             next_instruction_index += 1
             
-        control.checkDataHazards()
+        control.checkDataHazards(pipeline_registers)
 
 
         for index in reversed(range(len(pipeline_registers))):
-            if pipeline_registers[index].input_instruction:
-                pipeline_registers[index].output_instruction = pipeline_registers[index].input_instruction 
-                pipeline_registers[index].input_instruction = None
+            if pipeline_registers[index].input:
+                pipeline_registers[index].output = pipeline_registers[index].input
+                pipeline_registers[index].output.update(cycle_count, pipeline_registers[index].input_name)
+                pipeline_registers[index].input = None
                 if index != len(pipeline_registers)-1:
-                    pipeline_registers[index + 1].input_instruction = pipeline_registers[index].output_instruction
+                    pipeline_registers[index + 1].input = pipeline_registers[index].output
 
         if next_instruction_index != -1:
-            pipeline_history.append(all_instructions[next_instruction_index])
-            pipeline_registers[0].input_instruction = pipeline_history[-1]
+            if next_instruction_index<len(all_instructions):
+                pipeline_history.append(all_instructions[next_instruction_index])
+                pipeline_registers[0].input = pipeline_history[-1]
 
         #update all registers after they moved to their new pipeline register
-
+        print_register()
+        cycle_count+=1
 
 
                 

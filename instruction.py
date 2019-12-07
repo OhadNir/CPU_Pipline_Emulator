@@ -67,7 +67,7 @@ class Instruction(object):
         else:
             to_add = stage
 
-        self.cycle_state[cycle] = to_add
+        self.cycle_states[cycle] = to_add
 
     def make_nop(self):  # for when we push nops, the plan is to copy the instruction its based on and then nop it
         self.full_instr = "nop"
