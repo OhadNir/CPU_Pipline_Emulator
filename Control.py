@@ -33,14 +33,12 @@ class Control(object):
         if pipeline_registers[MEMWB].input is not None and pipeline_registers[MEMWB].input.full_instr != "nop":
             if (not EXHazard) and pipeline_registers[MEMWB].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[MEMWB].input.RD==pipeline_registers[IDEX].input.RS:
                 self.DataHazardFlag=True
-            #print("THIS:",(not EXHazard) and pipeline_registers[MEMWB].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[MEMWB].input.RD==pipeline_registers[IDEX].input.RT)
             if (not EXHazard) and pipeline_registers[MEMWB].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[MEMWB].input.RD==pipeline_registers[IDEX].input.RT:
                 self.DataHazardFlag=True
 
     def BranchValue(self, pipeline_registers, branch_labels):
         MEMWB=3
         instr=pipeline_registers[MEMWB].input
-        #print("Next:", instr.RS, " ", instr.RT, " ", instr.RS == instr.RT)
         if instr.operation=="beq" and instr.RS==instr.RT:
             return branch_labels[instr.RD]
         if instr.operation=="bne" and instr.RS!=instr.RT:

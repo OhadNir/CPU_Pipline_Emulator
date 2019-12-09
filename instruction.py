@@ -60,9 +60,8 @@ class Instruction(object):
 
 
     def __str__(self):
-        #instr_string = self.full_instr + '\t'
+        instr_string = self.full_instr + '\t'
         
-        instr_string = self.full_instr + "\t\t"
         for state in range(len(self.cycle_states)):
             instr_string += self.cycle_states[state]
             if state < len(self.cycle_states) - 1:
@@ -70,7 +69,6 @@ class Instruction(object):
         return instr_string
     
     def update(self, cycle, stage):  # cycle is an int, stage is a string
-        # print("INST/Stage:", self.full_instr, stage)
         if self.dead == True:
             to_add = "*"
         else:

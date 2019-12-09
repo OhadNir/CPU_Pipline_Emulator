@@ -57,21 +57,21 @@ def ALU(instr):
         second=int(instr.RT)
     else:
         second=int(register_data[instr.RT])
-    if instr.operation=="add" or instr.operation=="addi":
-        register_data[instr.RD]=first+second
-    elif instr.operation=="and" or instr.operation=="andi":
-        register_data[instr.RD]=first&second
-    elif instr.operation=="or" or instr.operation=="ori":
-        register_data[instr.RD]=first|second
-    elif instr.operation=="slt" or instr.operation=="slti":
-        register_data[instr.RD]=int(first<second)
-    elif instr.operation=="beq":
-        register_data[instr.RD]=int(first==second)
-    elif instr.operation=="bne":
-        register_data[instr.RD]=int(first!=second)
-
-    else:
-        raise Exception ("The operation is not supported by the ALU")
+    if instr.operation not in ("beq", "bne"):
+        if instr.operation=="add" or instr.operation=="addi":
+            register_data[instr.RD]=first+second
+        elif instr.operation=="and" or instr.operation=="andi":
+            register_data[instr.RD]=first&second
+        elif instr.operation=="or" or instr.operation=="ori":
+            register_data[instr.RD]=first|second
+        elif instr.operation=="slt" or instr.operation=="slti":
+            register_data[instr.RD]=int(first<second)
+        elif instr.operation=="beq":
+            register_data[instr.RD]=int(first==second)
+        elif instr.operation=="bne":
+            register_data[instr.RD]=int(first!=second)
+        else:
+            raise Exception ("The operation is not supported by the ALU")
 
 
 def read_file():
@@ -105,8 +105,7 @@ def make_pipereg():
 
 #I'm assuming this is the function to print the entire pipeline
 def print_register():
-    #print("CPU Cycles ===>\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14\t15\t16")
-    print("CPU Cycles ===>\t\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14\t15\t16")
+    print("CPU Cycles ===>\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14\t15\t16")
     for instr in pipeline_history:
         print(instr)
     
@@ -134,7 +133,6 @@ if __name__ == '__main__':
     print("-" * 82)
 
     pipeline_registers=make_pipereg()
-    
     while cycle_count < max_cycle_count:
         temp = control.CheckBranch(pipeline_registers, branch_labels)
         if temp != -1: 
@@ -196,26 +194,4 @@ if __name__ == '__main__':
         #update all registers after they moved to their new pipeline register
         cycle_count+=1
 
-
-                
-    '''
-    
-        update pipeline
-        {
-            pass mem/wb output to alu func
-            check for hazerds from control
-            move input and outputs for pipereg objects list
-                if in input then move to output and set input to NULL
-                if its input output set output to NULL
-                call update instructions on instructions as they are moved.
-        }
-        print_pipeline()
-        update registers 
-        {
-            done in ALU step
-        }
-        print_registers()
-    
-
-    '''
     print("END OF SIMULATION")
