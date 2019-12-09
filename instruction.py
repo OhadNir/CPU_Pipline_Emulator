@@ -5,7 +5,7 @@ Created on Mon Nov 25 13:28:40 2019
 @author: Xerox
 Basic class for storing standardized instruction data
 """
-
+from copy import deepcopy
 #I'm not sure that we need this, so I'll prob just delete later
 R_Types = ["add, and, or, slt"]
 
@@ -20,49 +20,58 @@ class Instruction(object):
     def __init__(self, instr_string):
         self.cycle_states = ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'] #Size of max cycles
         self.full_instr = instr_string
+        self.till_dead = -1
+        self.dead = False
+        if instr_string != "nop":
+            split_instr = instr_string.split(" ")
+            self.operation = split_instr[0]
 
-        split_instr = instr_string.split(" ")
-        self.operation = split_instr[0]
+            split_regs = split_instr[1].split(",")
+            
+            #DEFAULT NOTATION
+            if self.operation not in ("beq", "bne"):
+                self.isBranch = False
+                self.RD = split_regs[0]
+                self.RS = split_regs[1]
 
-        split_regs = split_instr[1].split(",")
-        
-        #DEFAULT NOTATION
-        if self.operation not in ("beq", "bne"):
-            self.isBranch = False
-            self.RD = split_regs[0]
-            self.RS = split_regs[1]
+                if(len(split_regs) == 3):
+                    self.RT = split_regs[2]
+                else:
+                    self.RT = ""
 
-            if(len(split_regs) == 3):
-                self.RT = split_regs[2]
+            #BRANCH NOTATION
             else:
-                self.RT = ""
+                self.isBranch = True
+                self.RD = split_regs[2]
+                self.RS = split_regs[0]
+                self.RT = split_regs[1]
 
-        #BRANCH NOTATION
+            self.type = None
+
+            if self.RS == "$zero":
+                self.RS = "0"
+            if self.RT == "zero":
+                self.RS = "0"
         else:
-            self.isBranch = True
-            self.RD = split_regs[2]
-            self.RS = split_regs[0]
-            self.RT = split_regs[1]
-
-        self.type = None
-
-        if self.RS == "$zero":
-            self.RS = "0"
-        if self.RT == "zero":
-            self.RS = "0"
+            self.isBranch = False
+            self.RD = 0
+            self.RS = 0
+            self.RT = 0
 
 
     def __str__(self):
-        instr_string = self.full_instr + '\t'
+        #instr_string = self.full_instr + '\t'
+        
+        instr_string = self.full_instr + "\t\t"
         for state in range(len(self.cycle_states)):
             instr_string += self.cycle_states[state]
             if state < len(self.cycle_states) - 1:
                 instr_string += '\t'
         return instr_string
     
-
     def update(self, cycle, stage):  # cycle is an int, stage is a string
-        if self.full_instr == "nop":  # very rudimentary, will fix later. maybe we should implement a counter?
+        # print("INST/Stage:", self.full_instr, stage)
+        if self.dead == True:
             to_add = "*"
         else:
             to_add = stage
@@ -70,5 +79,9 @@ class Instruction(object):
         self.cycle_states[cycle] = to_add
 
     def make_nop(self):  # for when we push nops, the plan is to copy the instruction its based on and then nop it
-        self.full_instr = "nop"
+        temp = Instruction("nop")
+        temp.dead = True
+        temp.cycle_states = deepcopy(self.cycle_states)
+        return temp
+
 

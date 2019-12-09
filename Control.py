@@ -10,9 +10,6 @@ class Control(object):
         self.DataHazardFlag=False
         self.ControlHazardFlag=False
         self.forwardFlag=ForwardStatus
-        self.forwardA=False
-        self.forwardB=False
-        self.BranchDestination=None
 
     '''
     Forward keys:
@@ -22,46 +19,37 @@ class Control(object):
     '''
     def checkDataHazards(self, pipeline_registers):
         self.DataHazardFlag=False
-        self.forwardA=0
-        self.forwardB=0
-        IFID=0
         IDEX=1
         EXMEM=2
         MEMWB=3
         EXHazard=False
-        if pipeline_registers[EXMEM].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[EXMEM].input.RD==pipeline_registers[IDEX].input.RS:
-            self.DataHazardFlag=True
-            self.ForwardA=1
-            EXHazard=True
-        if pipeline_registers[EXMEM].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[EXMEM].input.RD==pipeline_registers[IDEX].input.RT:
-            self.DataHazardFlag=True
-            self.ForwardB=1
-            EXHazard=True
-        if (not EXHazard) and pipeline_registers[MEMWB].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[MEMWB].input.RD==pipeline_registers[IDEX].input.RS:
-            self.DataHazardFlag=True
-            self.ForwardA=2
-        if (not EXHazard) and pipeline_registers[MEMWB].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[MEMWB].input.RD==pipeline_registers[IDEX].input.RT:
-            self.DataHazrdFlag=True
-            self.ForwardB=2
+        if pipeline_registers[EXMEM].input is not None and pipeline_registers[EXMEM].input.full_instr != "nop":
+            if pipeline_registers[EXMEM].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[EXMEM].input.RD==pipeline_registers[IDEX].input.RS:
+                self.DataHazardFlag=True
+                EXHazard=True
+            if pipeline_registers[EXMEM].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[EXMEM].input.RD==pipeline_registers[IDEX].input.RT:
+                self.DataHazardFlag=True
+                EXHazard=True
+        if pipeline_registers[MEMWB].input is not None and pipeline_registers[MEMWB].input.full_instr != "nop":
+            if (not EXHazard) and pipeline_registers[MEMWB].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[MEMWB].input.RD==pipeline_registers[IDEX].input.RS:
+                self.DataHazardFlag=True
+            #print("THIS:",(not EXHazard) and pipeline_registers[MEMWB].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[MEMWB].input.RD==pipeline_registers[IDEX].input.RT)
+            if (not EXHazard) and pipeline_registers[MEMWB].input is not None and pipeline_registers[IDEX].input is not None and pipeline_registers[MEMWB].input.RD==pipeline_registers[IDEX].input.RT:
+                self.DataHazardFlag=True
 
-    def BranchValue(self, pipeline_registers):
-        IFID=0
-        IDEX=1
-        EXMEM=2
+    def BranchValue(self, pipeline_registers, branch_labels):
         MEMWB=3
-        instr=pipeline_registers[MEMWB].ouput
+        instr=pipeline_registers[MEMWB].input
+        #print("Next:", instr.RS, " ", instr.RT, " ", instr.RS == instr.RT)
         if instr.operation=="beq" and instr.RS==instr.RT:
-            return branch_labels[isntr.RD]
+            return branch_labels[instr.RD]
         if instr.operation=="bne" and instr.RS!=instr.RT:
             return branch_labels[instr.RD]
         return -1
 
-    def CheckBranch(self, pipeline_registers):
-        IFID=0
-        IDEX=1
-        EXMEM=2
+    def CheckBranch(self, pipeline_registers, branch_labels):
         MEMWB=3
-        instr=pipeline_registers[MEMWB].output
+        instr=pipeline_registers[MEMWB].input
         if instr is not None and instr.isBranch:
-            return self.BranchValue(pipeline_registers)
+            return self.BranchValue(pipeline_registers, branch_labels)
         return -1

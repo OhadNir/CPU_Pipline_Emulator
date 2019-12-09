@@ -1,4 +1,4 @@
-global register_data, pipeline_registers, pipeline_history, all_instructions, cycle_count, max_cycle_count, next_instruction_index, control
+global register_data, pipeline_registers, pipeline_history, all_instructions, cycle_count, max_cycle_count, next_instruction_index, control, branch_labels
 import sys
 import CLA
 from instruction import Instruction
@@ -36,6 +36,8 @@ next_instruction_index = -1
 
 
 def ALU(instr):
+    if instr.full_instr == "nop":
+        return
     if instr is None:
         return
     if type(instr) is not Instruction:
@@ -77,13 +79,15 @@ def read_file():
     return "inst"
 
 def make_pipeline(filename):
-    next_index = 1
+    next_index = 0
     
     file = open(filename, 'r', encoding = "utf-8")
     for line in file:
         #HIT A LABEL (All labels end in ':')
-        if line.strip()[-1] == ':': 
-            branch_labels[line.strip()] = next_index
+        line = line.strip()
+        if line[-1] == ':':
+            line = line[:-1] 
+            branch_labels[line] = next_index
             continue
         
         all_instructions.append(Instruction(line.strip()))
@@ -101,8 +105,9 @@ def make_pipereg():
 
 #I'm assuming this is the function to print the entire pipeline
 def print_register():
-    print("CPU Cycles ===>\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14\t15\t16")
-    for instr in all_instructions:
+    #print("CPU Cycles ===>\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14\t15\t16")
+    print("CPU Cycles ===>\t\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14\t15\t16")
+    for instr in pipeline_history:
         print(instr)
     
     print("")
@@ -122,43 +127,73 @@ def print_register():
 if __name__ == '__main__':
 
     CLA.run_error_check() #DEBUG
-    isForwarding = (sys.argv[1] == "N")
+    isForwarding = (sys.argv[1] == "F")
     make_pipeline(sys.argv[2])
     control=Control(isForwarding)
-    print("START OF SIMULATION (" + ("no " if isForwarding else "") + "forwarding)" )
+    print("START OF SIMULATION (" + ("no " if not isForwarding else "") + "forwarding)" )
     print("-" * 82)
 
     pipeline_registers=make_pipereg()
     
     while cycle_count < max_cycle_count:
-        temp = control.CheckBranch(pipeline_registers)
+        temp = control.CheckBranch(pipeline_registers, branch_labels)
         if temp != -1: 
             next_instruction_index = temp
+            pipeline_registers[-1].output.update(cycle_count, "WB")
+            for register in pipeline_registers:
+                if(register.input != None):
+                    register.input.till_dead = 1
         else:
             if pipeline_registers[-1].output is not None:
                 ALU(pipeline_registers[-1].output) #output is the current instruction in the wb pipreg object. Varable can chance based on chosen object varable.
                 pipeline_registers[-1].output.update(cycle_count, "WB")
-            pipeline_registers[-1].output=None
             next_instruction_index += 1
-            
+        
+        pipeline_registers[-1].output=None
         control.checkDataHazards(pipeline_registers)
-
-
+        
         for index in reversed(range(len(pipeline_registers))):
             if pipeline_registers[index].input:
-                pipeline_registers[index].output = pipeline_registers[index].input
-                pipeline_registers[index].output.update(cycle_count, pipeline_registers[index].input_name)
-                pipeline_registers[index].input = None
-                if index != len(pipeline_registers)-1:
-                    pipeline_registers[index + 1].input = pipeline_registers[index].output
+                if pipeline_registers[index].input.till_dead != -1:
+                    if pipeline_registers[index].input.till_dead == 0:
+                        pipeline_registers[index].input.dead = True
+                    pipeline_registers[index].input.till_dead -= 1
+                #print("SAFTY:", control.DataHazardFlag, " " , not control.forwardFlag, " " , index == 1)
+                if control.DataHazardFlag and not control.forwardFlag and index == 1:
+                    safety=pipeline_registers[index].input
+                    nop = pipeline_registers[index].input.make_nop()
+                    pipeline_registers[index+1].input = nop
+                    pipeline_registers[index].output = nop
+                    insert_index = pipeline_history.index(safety)
+                    pipeline_history.insert(insert_index, nop)
+                    pipeline_registers[index].output.update(cycle_count, "EX")
+
+                pipeline_registers[index].input.update(cycle_count, pipeline_registers[index].input_name)
+                if pipeline_registers[index].output is None:
+                    # print("Moving:", pipeline_registers[index].input.full_instr)
+                    pipeline_registers[index].output = pipeline_registers[index].input
+                    pipeline_registers[index].input = None
+                    if index != 0:
+                        pipeline_registers[index-1].output=None
+                    if index != len(pipeline_registers)-1:
+                        pipeline_registers[index + 1].input = pipeline_registers[index].output
+
+        if cycle_count != -1:
+            print_register()
 
         if next_instruction_index != -1:
             if next_instruction_index<len(all_instructions):
-                pipeline_history.append(all_instructions[next_instruction_index])
+                
+                if all_instructions[next_instruction_index] in pipeline_history:
+                    temp_instr = Instruction(all_instructions[next_instruction_index].full_instr)
+                    pipeline_history.append(temp_instr)
+                else:
+                    pipeline_history.append(all_instructions[next_instruction_index])
+                
                 pipeline_registers[0].input = pipeline_history[-1]
 
+
         #update all registers after they moved to their new pipeline register
-        print_register()
         cycle_count+=1
 
 
