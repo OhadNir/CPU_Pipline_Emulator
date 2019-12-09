@@ -105,7 +105,8 @@ def make_pipereg():
 
 #I'm assuming this is the function to print the entire pipeline
 def print_register():
-    print("CPU Cycles ===>\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\t11\t12\t13\t14\t15\t16")
+    print("{:20s}{:4s}{:4s}{:4s}{:4s}{:4s}{:4s}{:4s}{:4s}{:4s}{:4s}{:4s}{:4s}{:4s}{:4s}{:4s}{}".format
+    ("CPU Cycles ===>","1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16"))
     for instr in pipeline_history:
         print(instr)
     
@@ -113,9 +114,9 @@ def print_register():
     i = 1
     for reg in register_data.keys():
         if i == len(register_data.keys()): #Last val
-            print(reg + " = " + str(register_data[reg]))
+            print(reg + " = " + str(register_data[reg]), sep = "", end = "\n")
         elif i % 4 != 0: #Common case
-            print(reg + " = " + str(register_data[reg]) + " \t", sep = "", end = "")
+            print("{:20s}".format(reg + " = " + str(register_data[reg])), sep = "", end = "")
         else: #Last on line
             print(reg + " = " + str(register_data[reg]), sep = "", end = "\n")
         i += 1
@@ -192,6 +193,8 @@ if __name__ == '__main__':
 
 
         #update all registers after they moved to their new pipeline register
+        if pipeline_registers[0].input is None and pipeline_registers[1].input is None and pipeline_registers[2].input is None and pipeline_registers[3].input is None and pipeline_registers[3].output is None:
+            break
         cycle_count+=1
 
     print("END OF SIMULATION")

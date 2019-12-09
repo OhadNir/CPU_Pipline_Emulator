@@ -60,12 +60,13 @@ class Instruction(object):
 
 
     def __str__(self):
-        instr_string = self.full_instr + '\t'
+        instr_string = "{:20s}".format(self.full_instr)
         
         for state in range(len(self.cycle_states)):
-            instr_string += self.cycle_states[state]
             if state < len(self.cycle_states) - 1:
-                instr_string += '\t'
+                instr_string += "{:4s}".format(self.cycle_states[state])
+            else:
+                instr_string += self.cycle_states[state]
         return instr_string
     
     def update(self, cycle, stage):  # cycle is an int, stage is a string
