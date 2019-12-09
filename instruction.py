@@ -18,6 +18,7 @@ R_Types = ["add, and, or, slt"]
 class Instruction(object):
 
     def __init__(self, instr_string):
+        self.delayed=False
         self.cycle_states = ['.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'] #Size of max cycles
         self.full_instr = instr_string
         self.till_dead = -1
@@ -77,10 +78,11 @@ class Instruction(object):
 
         self.cycle_states[cycle] = to_add
 
-    def make_nop(self):  # for when we push nops, the plan is to copy the instruction its based on and then nop it
+    def make_nop(self, cycle):  # for when we push nops, the plan is to copy the instruction its based on and then nop it
         temp = Instruction("nop")
         temp.dead = True
         temp.cycle_states = deepcopy(self.cycle_states)
+        temp.cycle_states[cycle]="ID"
         return temp
 
 

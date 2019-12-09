@@ -36,6 +36,9 @@ next_instruction_index = -1
 
 
 def ALU(instr):
+    #print("Running:", instr.full_instr)
+    if instr.dead:
+        return
     if instr.full_instr == "nop":
         return
     if instr is None:
@@ -143,10 +146,11 @@ if __name__ == '__main__':
                 if(register.input != None):
                     register.input.till_dead = 1
         else:
-            if pipeline_registers[-1].output is not None:
-                ALU(pipeline_registers[-1].output) #output is the current instruction in the wb pipreg object. Varable can chance based on chosen object varable.
-                pipeline_registers[-1].output.update(cycle_count, "WB")
             next_instruction_index += 1
+        
+        if pipeline_registers[-1].output is not None:
+            ALU(pipeline_registers[-1].output) #output is the current instruction in the wb pipreg object. Varable can chance based on chosen object varable.
+            pipeline_registers[-1].output.update(cycle_count, "WB")
         
         pipeline_registers[-1].output=None
         control.checkDataHazards(pipeline_registers)
@@ -159,17 +163,18 @@ if __name__ == '__main__':
                     pipeline_registers[index].input.till_dead -= 1
                 #print("SAFTY:", control.DataHazardFlag, " " , not control.forwardFlag, " " , index == 1)
                 if control.DataHazardFlag and not control.forwardFlag and index == 1:
-                    safety=pipeline_registers[index].input
-                    nop = pipeline_registers[index].input.make_nop()
+                    pipeline_registers[1].input.delayed=True
+                    nop = pipeline_registers[index].input.make_nop(cycle_count)
                     pipeline_registers[index+1].input = nop
                     pipeline_registers[index].output = nop
-                    insert_index = pipeline_history.index(safety)
-                    pipeline_history.insert(insert_index, nop)
-                    pipeline_registers[index].output.update(cycle_count, "EX")
 
                 pipeline_registers[index].input.update(cycle_count, pipeline_registers[index].input_name)
+                if pipeline_registers[index].input.full_instr=="nop" and pipeline_registers[1].input and pipeline_registers[1].input.delayed:
+                    insert_index = pipeline_history.index(pipeline_registers[1].input)
+                    pipeline_history.insert(insert_index, pipeline_registers[2].input)
+                    pipeline_registers[1].input.delayed=False
                 if pipeline_registers[index].output is None:
-                    # print("Moving:", pipeline_registers[index].input.full_instr)
+                    #print("Moving:", pipeline_registers[index].input.full_instr)
                     pipeline_registers[index].output = pipeline_registers[index].input
                     pipeline_registers[index].input = None
                     if index != 0:
