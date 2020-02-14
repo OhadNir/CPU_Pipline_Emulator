@@ -1,4 +1,4 @@
-# co_project
+# CPU_Pipline_Emulator
 Computer Organization Group Project
 
 Meeting 1 Notes:
